@@ -34,10 +34,20 @@ $fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filenam
 
 $explodeCsvStatus = $fileHandler->explodeCsv();
 if( $explodeCsvStatus  != false){
+
     $tableMaker = new TableMaker($fileHandler->getData());
-    var_dump($tableMaker);
+    $tableStatus = $tableMaker->generateTableHtml();
+    if( $tableStatus  != false){
+        echo $tableMaker->getData();
+    }else{
+        echo "<h2>Something went wrong:<br />" . $tableMaker->getData() . "<br /><br /></h2>";
+    }
+    // echo "tableStatus: <br />";
+    // var_dump($tableStatus);
+    // echo "<br />table: <br />";
+    // echo $tableMaker->getData();
 } else{
-        echo "<h3>Something went wrong:<br />" . $fileHandler->getData() . "<br /><br /></h3>";
+    echo "<h2>Something went wrong:<br />" . $fileHandler->getData() . "<br /><br /></h2>";
 }
 // prepare csv data for table
 
@@ -45,10 +55,9 @@ if( $explodeCsvStatus  != false){
 
 
 
-echo "<br /> <br />";
-$echoData = $fileHandler->getData();
-
-echo "data is: <br />";var_dump($echoData);
+// echo "<br /> <br />";
+// $echoData = $fileHandler->getData();
+// echo "data is: <br />";var_dump($echoData);
 
 
 

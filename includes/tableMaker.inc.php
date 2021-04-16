@@ -9,25 +9,47 @@ class TableMaker{
         $this->workingData = $inputData;
     }
 
-    public function generateTable($hasHeaders = true){
-        $htmlForTable = '';
+    public function generateTableHtml($hasHeaders = true){
+        $this->workingData = $this->inputData;
+        $htmlForTable = '<table>';
         if($hasHeaders){
-            $this->getHeaders();
+            // $headerRow = $this->getHeaders();
+            $headerRow = array_shift($this->workingData); // remove header from working data
+            $headerHtml = '<thead>' . $this->generateRowHtml($headerRow, 'th') . '</thead>';
+            $htmlForTable .= $headerHtml;
+            // array_shift($this->workingData); // remove header from working data
         }
-        return $this->workingData;
+
+        for($i = 0; $i < count($this->workingData); $i++){
+            $htmlForTable .= $this->generateRowHtml($this->workingData[$i]);
+        }
+
+
+        $htmlForTable .= '</table>';
+        $this->workingData = $htmlForTable;
+        return "working data set to htmlForTable";
     }
 
     protected function getHeaders(){
-
+        $headers = $this->inputData[0];
+        return $headers;
     }
 
-    protected function generateHtmlForRow($rowData){
-        $rowHtml = '';
-        
+    protected function generateRowHtml($rowData, $cellElemement = 'td'){
+        $rowHtml = '<tr>';
+        for($i=0; $i < count($rowData); $i++){
+            $rowHtml .= $this->generateCellHtml($rowData[$i], $cellElemement);
+        }
+        $rowHtml .= '</tr>';
+        return $rowHtml;
     }
-    protected function generateHtmlForCell($cellData){
-        $cellHtml = '<td>' . $cellData . '</td>';
+    protected function generateCellHtml($cellData, $cellElemement = 'td'){
+        $cellHtml = '<' . $cellElemement . '>' . $cellData . '</' . $cellElemement . '>';
         return $cellHtml;
+    }
+
+    public function getData(){
+        return $this->workingData;
     }
 
 }
