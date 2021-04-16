@@ -14,47 +14,49 @@
 </head>
 
 <body>
-    <h1>Something</h1>
+    <h1>Create a Table</h1>
 
     <!-- <form action="makeTable.php" method="post" enctype="multipart/form-data"> -->
     <form action="" method="post" enctype="multipart/form-data">
-        CSV To Make Table From:<input type="file" name="filename" accept=".csv"> <br />
-        <input type="submit" value="Upload File" name="submit">
+        CSV To Make Table From:<br /><input type="file" name="filename" accept=".csv">
+        <br /><br />
+        <input type="submit" value="Upload CSV File" name="submit">
     </form>
 
 
 
 
-<?php
+    <?php
 if (isset($_POST['submit'])){
 
 $fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filename']['type']);
 
 $fileHandler->explodeCsv();
+$data = $fileHandler->getData();
 
 echo "data is: <br />";
+var_dump($data);
 
-
-// echo "<!--";    
+echo "<!--";
 ?><br />_DATA:<br /><?php
     var_dump($fileHandler->getData());
 ?><br />_POST:<br /><?php
     var_dump($_POST);
 ?><br />_FILES:<br /><?php
     var_dump($_FILES);
-echo "<!--";
+// echo "<!--";
 ?><br /><br /><?php
-  $handle = fopen($_FILES['filename']['tmp_name'], "r");
-  $headers = fgetcsv($handle, 1000, ",");
-  $data = fgetcsv($handle, 1000, ",");
-  ?><br />Handle:<br /><?php
-  var_dump($handle);
-  ?><br /><br />Headers:<br /><?php
-  var_dump($headers);
-  ?><br /><br />Data:<br /><?php
-  var_dump($data);
-  ?><br /><br /><?php
-  fclose($handle);
+    // $handle = fopen($_FILES['filename']['tmp_name'], "r");
+    // $headers = fgetcsv($handle, 1000, ",");
+    // $data = fgetcsv($handle, 1000, ",");
+    // ?><br />Handle:<br /><?php
+    // var_dump($handle);
+    // ?><br /><br />Headers:<br /><?php
+    // var_dump($headers);
+    // ?><br /><br />Data:<br /><?php
+    // var_dump($data);
+    // ?><br /><br /><?php
+    // fclose($handle);
 echo "-->";  
 }
 ?>
