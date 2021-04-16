@@ -1,6 +1,6 @@
 <?php
-  include 'includes/fileHandler.inc.php';
-  include 'includes/tableMaker.inc.php';
+    include 'includes/fileHandler.inc.php';
+    include 'includes/tableMaker.inc.php';
 ?>
 
 <!DOCTYPE html>
@@ -31,19 +31,34 @@ if (isset($_POST['submit'])){
 
 $fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filename']['type']);
 
-$fileHandler->explodeCsv();
-$data = $fileHandler->getData();
 
-echo "data is: <br />";
-var_dump($data);
+$explodeCsvStatus = $fileHandler->explodeCsv();
+if( $explodeCsvStatus  != false){
+    $tableMaker = new TableMaker($fileHandler->getData());
+    var_dump($tableMaker);
+} else{
+        echo "<h3>Something went wrong:<br />" . $fileHandler->getData() . "<br /><br /></h3>";
+}
+// prepare csv data for table
+
+// var_dump($tableMaker);
+
+
+
+echo "<br /> <br />";
+$echoData = $fileHandler->getData();
+
+echo "data is: <br />";var_dump($echoData);
+
+
 
 echo "<!--";
 ?><br />_DATA:<br /><?php
-    var_dump($fileHandler->getData());
-?><br />_POST:<br /><?php
-    var_dump($_POST);
-?><br />_FILES:<br /><?php
-    var_dump($_FILES);
+//     var_dump($fileHandler->getData());
+// ?><br />_POST:<br /><?php
+//     var_dump($_POST);
+// ?><br />_FILES:<br /><?php
+//     var_dump($_FILES);
 // echo "<!--";
 ?><br /><br /><?php
     // $handle = fopen($_FILES['filename']['tmp_name'], "r");

@@ -1,23 +1,35 @@
 <?php
 
 class TableMaker{
+    private $inputData;
     private $workingData;
 
     public function __construct($inputData){
+        $this->inputData = $inputData;
         $this->workingData = $inputData;
     }
 
-    public function generateTable(){
+    public function generateTable($hasHeaders = true){
+        $htmlForTable = '';
+        if($hasHeaders){
+            $this->getHeaders();
+        }
         return $this->workingData;
     }
-    protected function calcProfitMargin($row){
-        // get header columns
-        // return 
+
+    protected function getHeaders(){
+
     }
-    protected function calcProfit($row){
-        // get header columns
-        // return 
+
+    protected function generateHtmlForRow($rowData){
+        $rowHtml = '';
+        
     }
+    protected function generateHtmlForCell($cellData){
+        $cellHtml = '<td>' . $cellData . '</td>';
+        return $cellHtml;
+    }
+
 }
 
 
