@@ -28,11 +28,11 @@
 <?php
 if (isset($_POST['submit'])){
 
-$fileHandler = new FileHandler($_FILES['filename']['tmp_name']);
-echo "data is: <br />";
+$fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filename']['type']);
+
 $fileHandler->explodeCsv();
 
-
+echo "data is: <br />";
 
 
 // echo "<!--";    
