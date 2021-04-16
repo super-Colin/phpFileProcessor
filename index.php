@@ -25,17 +25,24 @@
 
 
 
-
-
-
-
 <?php
 if (isset($_POST['submit'])){
 
+$fileHandler = new FileHandler($_FILES['filename']['tmp_name']);
+echo "data is: <br />";
+$fileHandler->explodeCsv();
+
+
+
+
+// echo "<!--";    
+?><br />_DATA:<br /><?php
+    var_dump($fileHandler->getData());
 ?><br />_POST:<br /><?php
     var_dump($_POST);
 ?><br />_FILES:<br /><?php
     var_dump($_FILES);
+echo "<!--";
 ?><br /><br /><?php
   $handle = fopen($_FILES['filename']['tmp_name'], "r");
   $headers = fgetcsv($handle, 1000, ",");
@@ -48,6 +55,7 @@ if (isset($_POST['submit'])){
   var_dump($data);
   ?><br /><br /><?php
   fclose($handle);
+echo "-->";  
 }
 ?>
 
