@@ -10,9 +10,9 @@ class TableMaker{
         $this->workingData = $inputData;
     }
     // calculate and add columns to row
-    static function addToRowProfitMargin($workingRow, $iOfBuyPrice, $iOfSellPrice){
+    static function addToRowProfitMargin( $workingRow, $iOfBuyPrice, $iOfSellPrice){
         $rowWithNewColumn = $workingRow;
-        $rowWithNewColumn[] = $workingRow[$iOfSellPrice - $workingRow[$iOfBuyPrice]];
+        $rowWithNewColumn[] = $workingRow[$iOfSellPrice] - $workingRow[$iOfBuyPrice];
         return $rowWithNewColumn;
     }
 
@@ -26,7 +26,10 @@ class TableMaker{
             $headerHtml = '<thead>';
             if(! empty( $columnFuncsToUse ) ){
                 for($columnFuncI = 0; $columnFuncI < count($columnFuncsToUse); $columnFuncI++){
-                    $headerRow[] = $columnFuncsToUse[$columnFuncI]["headerLabel"];
+                    // Check for and add header label
+                    if(! empty( $columnFuncsToUse[$columnFuncI]["headerLabel"]) ){
+                        $headerRow[] = $columnFuncsToUse[$columnFuncI]["headerLabel"];
+                    }
                 }
             }
             $headerHtml .= $this->generateRowHtml($headerRow, 'th');
@@ -36,12 +39,19 @@ class TableMaker{
         
         // TABLE ROWS
         for($i = 0; $i < count($this->workingData); $i++){
-            // add columns to row before html is generated
+            // add columns to row before html is generated if needed
             if(! empty( $columnFuncsToUse ) ){
+
+                // apply middleware functions on row
                 for($columnFuncI = 0; $columnFuncI < count($columnFuncsToUse); $columnFuncI++){
-                    $funcToUse =$columnFuncsToUse[$columnFuncI]["functionName"];
-                    self::$funcToUse();
+                    $funcToUse = $columnFuncsToUse[$columnFuncI]["functionName"];
+                    if(method_exists(__CLASS__, $funcToUse)){
+                        $funcArgs = $columnFuncsToUse[$columnFuncI]["functionArgs"];
+                        $this->workingData[$i] = self::$funcToUse( $this->workingData[$i], ...$funcArgs);
+                    }
                 }
+
+
             }
             $htmlForTable .= $this->generateRowHtml($this->workingData[$i]);
         }
@@ -51,7 +61,7 @@ class TableMaker{
         return "working data set to htmlForTable";
     }
 
-    static function test(){echo "TEST";}
+    static function test($args){echo "TEST recieving: <br />" . var_dump($args);}
 
 
     protected function generateRowHtml($rowData, $cellElemement = 'td'){

@@ -38,7 +38,7 @@ if( $explodeCsvStatus  != false){
     // $tableStatus = $tableMaker->generateTableHtml( true, [TableMaker::addToRowProfitMargin], ["Profit Margin"]);
     $tableStatus = $tableMaker->generateTableHtml( true, array(
         // array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[])
-        array("headerLabel"=>"Profit Margin", "functionName"=>"test", "functionArgs"=>[])
+        array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[1, 2])
     ));
 
 
