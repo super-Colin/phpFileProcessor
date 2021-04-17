@@ -24,42 +24,40 @@
     </form>
 
 
-
-
-    <?php
+<?php
 if (isset($_POST['submit'])){
 
 $fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filename']['type']);
 
-
 $explodeCsvStatus = $fileHandler->explodeCsv();
 if( $explodeCsvStatus  != false){
-
     $tableMaker = new TableMaker($fileHandler->getData());
-    $tableStatus = $tableMaker->generateTableHtml();
+
+
+    // $tableStatus = $tableMaker->generateTableHtml();
+    // $tableStatus = $tableMaker->generateTableHtml( true, [TableMaker::addToRowProfitMargin], ["Profit Margin"]);
+    $tableStatus = $tableMaker->generateTableHtml( true, array(
+        // array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[])
+        array("headerLabel"=>"Profit Margin", "functionName"=>"test", "functionArgs"=>[])
+    ));
+
+
     if( $tableStatus  != false){
         echo $tableMaker->getData();
-    }else{
-        echo "<h2>Something went wrong:<br />" . $tableMaker->getData() . "<br /><br /></h2>";
     }
-    // echo "tableStatus: <br />";
-    // var_dump($tableStatus);
-    // echo "<br />table: <br />";
-    // echo $tableMaker->getData();
-} else{
-    echo "<h2>Something went wrong:<br />" . $fileHandler->getData() . "<br /><br /></h2>";
-}
-// prepare csv data for table
+    else{echo "<h2>Something went wrong:<br />" . $tableMaker->getData() . "<br /><br /></h2>";}
+} 
+else{echo "<h2>Something went wrong:<br />" . $fileHandler->getData() . "<br /><br /></h2>";}
 
-// var_dump($tableMaker);
+
+
+
 
 
 
 // echo "<br /> <br />";
 // $echoData = $fileHandler->getData();
 // echo "data is: <br />";var_dump($echoData);
-
-
 
 echo "<!--";
 ?><br />_DATA:<br /><?php
@@ -102,6 +100,23 @@ echo "-->";
             objXMLHttpRequest.send();
         }
     </script> -->
+
+    <style>
+        thead{
+            background-color:#eee;
+        }
+        th{
+            background-color:#e3e3e3;
+            margin: 2px;
+        }
+        tbody{
+            background-color:#ccc;
+        }
+        td{
+            background-color:#c3c3c3;
+            margin: 2px;
+        }
+    </style>
 </body>
 
 </html>

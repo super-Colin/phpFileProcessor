@@ -1,6 +1,7 @@
 <?php
 
 class TableMaker{
+    private $columnAddingFunctions = ["profitMargin"];
     private $inputData;
     private $workingData;
 
@@ -8,32 +9,50 @@ class TableMaker{
         $this->inputData = $inputData;
         $this->workingData = $inputData;
     }
+    // calculate and add columns to row
+    static function addToRowProfitMargin($workingRow, $iOfBuyPrice, $iOfSellPrice){
+        $rowWithNewColumn = $workingRow;
+        $rowWithNewColumn[] = $workingRow[$iOfSellPrice - $workingRow[$iOfBuyPrice]];
+        return $rowWithNewColumn;
+    }
 
-    public function generateTableHtml($hasHeaders = true){
+    public function generateTableHtml( $hasHeaders = true, $columnFuncsToUse=[]){
         $this->workingData = $this->inputData;
         $htmlForTable = '<table>';
+        
+        // TABLE HEADER
         if($hasHeaders){
-            // $headerRow = $this->getHeaders();
             $headerRow = array_shift($this->workingData); // remove header from working data
-            $headerHtml = '<thead>' . $this->generateRowHtml($headerRow, 'th') . '</thead>';
+            $headerHtml = '<thead>';
+            if(! empty( $columnFuncsToUse ) ){
+                for($columnFuncI = 0; $columnFuncI < count($columnFuncsToUse); $columnFuncI++){
+                    $headerRow[] = $columnFuncsToUse[$columnFuncI]["headerLabel"];
+                }
+            }
+            $headerHtml .= $this->generateRowHtml($headerRow, 'th');
+            $headerHtml .= '</thead>';
             $htmlForTable .= $headerHtml;
-            // array_shift($this->workingData); // remove header from working data
         }
-
+        
+        // TABLE ROWS
         for($i = 0; $i < count($this->workingData); $i++){
+            // add columns to row before html is generated
+            if(! empty( $columnFuncsToUse ) ){
+                for($columnFuncI = 0; $columnFuncI < count($columnFuncsToUse); $columnFuncI++){
+                    $funcToUse =$columnFuncsToUse[$columnFuncI]["functionName"];
+                    self::$funcToUse();
+                }
+            }
             $htmlForTable .= $this->generateRowHtml($this->workingData[$i]);
         }
-
-
         $htmlForTable .= '</table>';
+
         $this->workingData = $htmlForTable;
         return "working data set to htmlForTable";
     }
 
-    protected function getHeaders(){
-        $headers = $this->inputData[0];
-        return $headers;
-    }
+    static function test(){echo "TEST";}
+
 
     protected function generateRowHtml($rowData, $cellElemement = 'td'){
         $rowHtml = '<tr>';
@@ -47,6 +66,12 @@ class TableMaker{
         $cellHtml = '<' . $cellElemement . '>' . $cellData . '</' . $cellElemement . '>';
         return $cellHtml;
     }
+
+
+    // protected function getHeaders(){
+    //     $headers = $this->inputData[0];
+    //     return $headers;
+    // }
 
     public function getData(){
         return $this->workingData;
