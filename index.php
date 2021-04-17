@@ -34,11 +34,14 @@ if( $explodeCsvStatus  != false){
     $tableMaker = new TableMaker($fileHandler->getData());
 
 
-    // $tableStatus = $tableMaker->generateTableHtml();
-    // $tableStatus = $tableMaker->generateTableHtml( true, [TableMaker::addToRowProfitMargin], ["Profit Margin"]);
     $tableStatus = $tableMaker->generateTableHtml( true, array(
-        // array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[])
-        array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[1, 2])
+        array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[1, 2]),
+        
+        // array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>["cost", "price"])
+
+
+
+        array("headerLabel"=>"Total Profit", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[1, 2,3])
     ));
 
 
