@@ -35,13 +35,13 @@ if( $explodeCsvStatus  != false){
 
 
     $tableStatus = $tableMaker->generateTableHtml( true, array(
-        array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[1, 2]),
-        
-        // array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>["cost", "price"])
+        // array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[1, 2]),
+
+        array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>["Cost", "Price"], "functionArgsAreLabels"=>true),
 
 
-
-        array("headerLabel"=>"Total Profit", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[1, 2,3])
+        // array("headerLabel"=>"Total Profit", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[1, 2,3], "functionArgsAreLabels"=>false),
+        array("headerLabel"=>"Total Profit", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true)
     ));
 
 
