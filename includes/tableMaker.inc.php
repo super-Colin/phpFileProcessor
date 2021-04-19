@@ -1,14 +1,16 @@
 <?php
 
+// need to get currency converter working
 
 // Need to be able to parse out currency symbols in input
 // ^^^^^^^^^^ - $ - ^^^^^^^^^^^
-// Look for positive / negative values in row functions
-// Running total for column functions = get totalSum / totalAverage 
 // Add back currency symbols - $ -
+
+// add positive / negative styling classes with css child selectors for column index relevance
 
 // Need to round averages summaries to 2 decimal points
 // Highest / Lowest value summary options??
+// Mark cells over a given value??
 
 class TableMaker{
     private $inputData;
@@ -17,14 +19,6 @@ class TableMaker{
     private $headers;
     private $otherVars;
     private $requestedSummaries = false;
-    // private $requestedSummaries = [
-    //     "Cost"=>[
-    //         // "columnIndex"=>headerLabelStringToIndex("Cost"),
-    //         "requested"=>"average",
-    //         "runningTotalSum"=>0,
-    //         "runningEntriesTotal"=>0
-    //     ]
-    // ];
 
     public function __construct($inputData){
         $this->inputData = $inputData;
@@ -33,12 +27,13 @@ class TableMaker{
 
 
     public function generateTableHtml( $hasHeaders = true, $columnFuncsToUse=[], $summaryFuncsToUse=[]){
-        $this->workingData = $this->inputData;
+        $this->workingData = $this->inputData; // make sure we're starting fresh with the input 
         $htmlForTable = '<table>';
+        
         // TABLE HEADER
         if($hasHeaders){
             $headerRow = array_shift($this->workingData); // remove header from working data
-            $this->headers = $headerRow;
+            $this->headers = $headerRow; // will be set again after new headers are added
             $this->setColumnFuncs($columnFuncsToUse);
             // echo '<br />HEADERS:<br />';
             // var_dump($this->headers);
@@ -46,11 +41,11 @@ class TableMaker{
             // var_dump($this->columnFuncs);
             $htmlForTable .= $this->generateTableHeadHtml( $headerRow);
         }
+        // make sure columnFuncs property is formatted properly if there weren't headers
         if($this->columnFuncs == false){$this->setColumnFuncs($columnFuncsToUse);}
 
         // TABLE ROWS
         $this->setRequestedSummaries($summaryFuncsToUse);
-        $this->setRequestedSummariesColumnIndexes();
         $htmlForTable .= $this->generateTableBodyHtml($this->workingData);
 
         //SUMMARIES BLOCK
@@ -64,6 +59,9 @@ class TableMaker{
     }
 
 
+    protected function generateStylesForColumnIndexes(){
+        $styles = "";
+    }
 
     protected function classesToAddToCell($cellData){
         $classList = array();
@@ -74,11 +72,43 @@ class TableMaker{
         return $classList;
     }
     protected function addClassPositiveOrNegative($cellData){
-        // $number = substr($cellHtml, 4, -4);
         if($cellData > 0){ return "positive";}
         if($cellData == 0){ return "zeroSum";}
         if($cellData < 0){ return "negative";}
-        
+    }
+
+    protected function generateTableHeadHtml($headerRow){
+            $headerHtml = '<thead>';
+            if(! empty( $this->columnFuncs ) ){
+                for($columnFuncI = 0; $columnFuncI < count($this->columnFuncs); $columnFuncI++){
+                    // Check for and add header label
+                    if(! empty( $this->columnFuncs[$columnFuncI]["headerLabel"]) ){
+                        $headerRow[] = $this->columnFuncs[$columnFuncI]["headerLabel"];
+                    }
+                }
+            }
+            $this->headers = $headerRow;
+            $headerHtml .= $this->generateRowHtml($headerRow, 'th') . '</thead>';
+            return $headerHtml;        
+    }
+
+    protected function generateTableBodyHtml($workingData){
+        $htmlForTableBody = "<tbody>";
+        for($i = 0; $i < count($this->workingData); $i++){// for item in row
+
+            if(! empty( $this->columnFuncs ) ){ // if middleware functions apply them
+                for($columnFuncI = 0; $columnFuncI < count($this->columnFuncs); $columnFuncI++){
+                    $funcToUse = $this->columnFuncs[$columnFuncI]["functionName"];
+                    if(method_exists(__CLASS__, $funcToUse)){
+                        $funcArgs = $this->columnFuncs[$columnFuncI]["functionArgs"];
+                        $this->workingData[$i] = self::$funcToUse( $this->workingData[$i], ...$funcArgs);
+                    }
+                }
+            }
+            $htmlForTableBody .= $this->generateRowHtml($this->workingData[$i]);
+        }
+        $htmlForTableBody .= "</tbody>";
+        return $htmlForTableBody;
     }
 
     protected function generateSummaryRows(){
@@ -134,43 +164,18 @@ class TableMaker{
 
     }
 
-    protected function generateTableHeadHtml($headerRow){
-            $headerHtml = '<thead>';
-            if(! empty( $this->columnFuncs ) ){
-                for($columnFuncI = 0; $columnFuncI < count($this->columnFuncs); $columnFuncI++){
-                    // Check for and add header label
-                    if(! empty( $this->columnFuncs[$columnFuncI]["headerLabel"]) ){
-                        $headerRow[] = $this->columnFuncs[$columnFuncI]["headerLabel"];
-                    }
-                }
-            }
-            $this->headers = $headerRow;
-            $headerHtml .= $this->generateRowHtml($headerRow, 'th') . '</thead>';
-            return $headerHtml;        
-    }
-
-    protected function generateTableBodyHtml($workingData){
-        $htmlForTableBody = "<tbody>";
-        for($i = 0; $i < count($this->workingData); $i++){// for item in row
-
-            if(! empty( $this->columnFuncs ) ){ // if middleware functions apply them
-                for($columnFuncI = 0; $columnFuncI < count($this->columnFuncs); $columnFuncI++){
-                    $funcToUse = $this->columnFuncs[$columnFuncI]["functionName"];
-                    if(method_exists(__CLASS__, $funcToUse)){
-                        $funcArgs = $this->columnFuncs[$columnFuncI]["functionArgs"];
-                        $this->workingData[$i] = self::$funcToUse( $this->workingData[$i], ...$funcArgs);
-                    }
-                }
-            }
-            $htmlForTableBody .= $this->generateRowHtml($this->workingData[$i]);
-        }
-        $htmlForTableBody .= "</tbody>";
-        return $htmlForTableBody;
-    }
-
     protected function generateRowHtml($rowData, $cellElemement = 'td'){
         $rowHtml = '<tr>';
         if($this->requestedSummaries != false){
+
+            
+            // $currencyUsedIndex = self::isCurrency( $workingRow[$cIndex] );
+            // if($currencyUsedIndex !== false){
+            //     $cleanedData = self::stripCurrencySymbol($cellData, $currencyUsedIndex);
+            // }else{$cleanedData = $workingRow[$cIndex];}
+            // $this->requestedSummaries[$i]["runningTotalSum"] += $cleanedData;
+
+
             $this->proccessRequestedSummariesForRow($rowData);
         }
         for($i=0; $i < count($rowData); $i++){
@@ -180,12 +185,29 @@ class TableMaker{
         return $rowHtml;
     }
     protected function generateCellHtml($cellData, $cellElemement = 'td'){
-        $classList = $this->classesToAddToCell($cellData);
+        $cleanedData = '';
+        // if(is_numeric($cellData)){ //middleware functions for ints
+        if(filter_var($cellData, FILTER_SANITIZE_NUMBER_INT)){ //middleware functions for ints
+            // echo "celldata is numeric: $cellData<br />";
+            $currencyUsedIndex = self::isCurrency($cellData);
+            // echo "currency used : $currencyUsedIndex";
+
+            if($currencyUsedIndex !== false){
+                $cleanedData = self::stripCurrencySymbol($cellData, $currencyUsedIndex);
+            }else{$cleanedData = $cellData;}
+
+        }else{
+            // echo "celldata is NOT numeric: $cellData<br />";
+            $cleanedData = $cellData;
+        }
+        // echo "<br />cleaned data is: $cleanedData <br />";
+
+        $classList = $this->classesToAddToCell($cleanedData);
         $classesAsString = '';
         foreach($classList as $class){
             $classesAsString .= $class . ' ';
         }
-        $cellHtml = '<' . $cellElemement . ' class="' . $classesAsString . '">' . $cellData . '</' . $cellElemement . '>';
+        $cellHtml = "<$cellElemement class='$classesAsString'>$cleanedData</$cellElemement>";
         return $cellHtml;
     }
 
@@ -213,6 +235,8 @@ class TableMaker{
                         // print_r($formattedFunc);
                         // print_r($formattedFunc["functionArgs"]);
                     }
+                }else{
+                    $formattedFunc["functionArgs"] = $funcArgs;
                 }
             }
             // echo '<br /><br />--- setColumnFuncs == Formatted Func is :  --- :<br />';
@@ -241,6 +265,7 @@ class TableMaker{
         // echo '<br />Set Requested Summaries FINISHED:<br />';
         // var_dump($formattedSummaries);
         $this->requestedSummaries = $formattedSummaries;
+        $this->setRequestedSummariesColumnIndexes();
     }
     protected function setRequestedSummariesColumnIndexes(){
         for($i=0; $i < count($this->requestedSummaries); $i++){
@@ -251,7 +276,9 @@ class TableMaker{
     protected function proccessRequestedSummariesForRow(  $workingRow ){
         for($i=0; $i < count($this->requestedSummaries); $i++){
             $cIndex = $this->requestedSummaries[$i]["columnIndex"];
-            $this->requestedSummaries[$i]["runningTotalSum"] += $workingRow[$cIndex];
+
+
+            $this->requestedSummaries[$i]["runningTotalSum"] += self::getIntFromString($workingRow[$cIndex]);
             $this->requestedSummaries[$i]["runningEntriesTotal"]++;
             // echo '<br />Proccess Summaries:<br />';
             // var_dump($this->requestedSummaries);
@@ -285,35 +312,72 @@ class TableMaker{
         // print_r($headerRow);
         // print_r($columnLabelString);
         $label = array_search( $columnLabelString, $headerRow, false);
+        // echo "label is : var_dump($label)";
         if( $label == false){ //must not be a reference to a header label
             return $columnLabelString;
         } else{ return $label; }
     }
     static function addToRowTotalProfit( $workingRow, $iOfBuyPrice, $iOfSellPrice, $iOfQuantitySold, $conversionRate=1){
         $rowWithNewColumn = $workingRow;
-        // echo '<br />addToRowProfitMargin :<br />';
-        // print_r($workingRow);
-        // echo '<br />';
-        // print_r($iOfBuyPrice);
-        // echo '<br />';
-        // print_r($iOfSellPrice);
-        // echo '<br />';
-        // print_r($iOfQuantitySold);
-        // echo '<br />';
-        $rowWithNewColumn[] = (($workingRow[$iOfSellPrice] - $workingRow[$iOfBuyPrice]) * $workingRow[$iOfQuantitySold]) * $conversionRate;
+        echo '<br />addToRowProfitMargin :<br />';
+        echo self::getIntFromString( $workingRow[$iOfBuyPrice] );
+        echo '<br />';
+        print_r($iOfBuyPrice);
+        echo '<br />';
+        print_r($iOfSellPrice);
+        echo '<br />';
+        print_r($iOfQuantitySold);
+        echo '<br />';
+        $rowWithNewColumn[] = 
+        ( 
+            self::getIntFromString( $workingRow[$iOfSellPrice] ) 
+            - 
+            self::getIntFromString( $workingRow[$iOfBuyPrice]) 
+        ) 
+        * self::getIntFromString( $workingRow[$iOfQuantitySold] ) 
+        * self::getIntFromString( $conversionRate );
         return $rowWithNewColumn;
     }
     static function addToRowProfitMargin( $workingRow, $iOfBuyPrice, $iOfSellPrice){
         $rowWithNewColumn = $workingRow;
-        // echo '<br />addRowToProfitMargin :<br />';
-        // print_r($workingRow);
-        // echo '<br />';
-        // print_r($iOfBuyPrice);
-        // echo '<br />';
-        // print_r($iOfSellPrice);
-        // echo '<br />';
-        $rowWithNewColumn[] = $workingRow[$iOfSellPrice] - $workingRow[$iOfBuyPrice];
+        echo '<br />addRowToProfitMargin :<br />';
+        print_r($workingRow);
+        echo '<br />';
+        print_r($iOfBuyPrice);
+        echo '<br />';
+        print_r($iOfSellPrice);
+        echo '<br />';
+        $rowWithNewColumn[] = self::getIntFromString($workingRow[$iOfSellPrice]) - self::getIntFromString($workingRow[$iOfBuyPrice]);
         return $rowWithNewColumn;
+    }
+    static function getIntFromString($string){
+        $currencyUsedIndex = self::isCurrency( $string );
+        if($currencyUsedIndex !== false){
+            $int = self::stripCurrencySymbol($string, $currencyUsedIndex);
+        }else{$int = (float) $string;}
+        echo "getIntFromString returning " . var_dump($int);
+        return $int;
+    }
+    static function isCurrency($string){
+        $currencySymbols = ["$", "¥", "€"];
+        if(filter_var($string, FILTER_SANITIZE_NUMBER_INT) === false){echo "IS NOT CURRENCY <br />";return false;}
+        for($i=0;$i < count($currencySymbols); $i++){
+            // echo "looking for currency symbol : " . $currencySymbols[$i] . " in string $string";
+            $symbolPos = strpos($string, $currencySymbols[$i]);
+            // var_dump($symbolPos);
+            if($symbolPos !== false){
+                // echo "currency symbol found, returning : $symbolPos";
+                return $symbolPos;
+            }
+        }
+        // echo "currency symbol NOT found, returning : $symbolPos";
+        return false;
+    }
+    static function stripCurrencySymbol($string, $currencyIndex){
+        $cleanedString= substr($string , ($currencyIndex+1) );
+        $intVal = (float) $cleanedString;
+        // echo "<br />stripped currency is now: " . var_dump($intVal) . "<br />";
+        return $intVal;
     }
 
     public function getData(){
