@@ -76,7 +76,7 @@ if( $explodeCsvStatus  != false){
         array("headerLabel"=>"Total Profit USD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true),
         array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfitConverted", "functionArgs"=>["Cost", "Price", "Qty", 1.25], "functionArgsAreLabels"=>true)
     ),
-        array(["Cost", "average"], ["Price", "average"], ["Total Profit USD", "totalSum"])
+        array(["Cost", "Average"], ["Price", "Average"], ["Total Profit USD", "Total"], ["Qty", "Total"])
 );
 
 

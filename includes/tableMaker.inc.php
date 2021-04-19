@@ -61,16 +61,13 @@ class TableMaker{
     }
 
     protected function generateSummaryRows(){
-        // $this->
         $summaryRows = [];
         echo '<br />FINAL SUMMARIES : <br />';
         var_dump($this->requestedSummaries);
         for($i=0; $i < count($this->requestedSummaries); $i++){
             $requestedOperation = $this->requestedSummaries[$i]["requestedOperation"];
-            if(array_key_exists( $requestedOperation, $summaryRows) ){
-                echo "<br />existing summary row for " . $requestedOperation;
-                
-            }else{
+            $currentSummaryTotal = $this->requestedSummaries[$i]["runningTotalSum"];
+            if(array_key_exists( $requestedOperation, $summaryRows) == false){
                 echo "<br />making summary row for " . $requestedOperation;
                 $summaryRows[$requestedOperation] = array();
                 // fill array with empty values
@@ -79,7 +76,11 @@ class TableMaker{
                     $summaryRows[$requestedOperation][$x]='-';
                 }
             }
-
+            echo "<br />existing summary row for " . $requestedOperation;
+            // Insert value into column index
+            $iOfOperationColumn = $this->requestedSummaries[$i]["columnIndex"];
+            $summaryRows[$requestedOperation][$iOfOperationColumn] = $currentSummaryTotal;
+            // $this->requestedSummaries[$i]
 
         }
         echo '<br />FINAL SUMMARY ROWS FIXED: <br />';
