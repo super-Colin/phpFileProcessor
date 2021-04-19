@@ -22,7 +22,7 @@
 
         <div>
             <h3>CSV To Make Table From:</h3>
-            <input type="file" name="filename" accept=".csv">
+            <input type="file" name="filename" accept=".csv" required>
         </div>
 
 <!-- <script>
@@ -56,7 +56,6 @@
 if (isset($_POST['submit'])){
 
 
-
 // $currencyConverter = new CurrencyConverter(); 
 // // $result = $currencyConverter->convert($currency_from = "USD", $currency_to = "CAD", $currency_input = 1);
 // $result = $currencyConverter->convert("JPY", "INR", 1);
@@ -70,13 +69,19 @@ $explodeCsvStatus = $fileHandler->explodeCsv();
 if( $explodeCsvStatus  != false){
     $tableMaker = new TableMaker($fileHandler->getData());
 
-
     $tableStatus = $tableMaker->generateTableHtml( true, array(
+        // Columns we want to add on processing
         array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>["Cost", "Price"], "functionArgsAreLabels"=>true),
         array("headerLabel"=>"Total Profit USD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true),
-        array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfitConverted", "functionArgs"=>["Cost", "Price", "Qty", 1.25], "functionArgsAreLabels"=>true)
+        array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty", 1.25], "functionArgsAreLabels"=>true)
     ),
-        array(["Cost", "Average"], ["Price", "Average"], ["Total Profit USD", "Total"], ["Qty", "Total"])
+    // Summaries to keep track of and output
+    array(
+        ["Cost", "Average"],
+        ["Price", "Average"],
+        ["Total Profit USD", "Total"],
+        ["Qty", "Total"]
+    )
 );
 
 
@@ -140,22 +145,41 @@ echo "-->";
     </script> -->
 
     <style>
-        .hidden{
-            display:none;
-        }
         thead{
             background-color:#eee;
         }
+        td, th{
+            padding: 0.3rem;
+        }
         th{
             background-color:#e3e3e3;
-            margin: 2px;
         }
         tbody{
             background-color:#ccc;
         }
         td{
             background-color:#c3c3c3;
-            margin: 2px;
+        }
+        .hidden{
+            display:none;
+        }
+        .summariesRow{
+            /* border:solid 2px #c3a3c3; */
+        }
+        .summariesRow th{
+            /* background-color:#dbd; */
+        }
+        .summariesRow td{
+            border: solid 2px #a373a3;
+        }
+        .summariesRow:nth-child(odd) td{
+            border: solid 2px #c9c;
+        }
+        .positive{
+            background-color:#8c8;
+        }
+        .negative{
+            background-color: #c88;
         }
     </style>
 </body>

@@ -7,6 +7,9 @@
 // Running total for column functions = get totalSum / totalAverage 
 // Add back currency symbols - $ -
 
+// Need to round averages summaries to 2 decimal points
+// Highest / Lowest value summary options??
+
 class TableMaker{
     private $inputData;
     private $workingData;
@@ -60,15 +63,43 @@ class TableMaker{
         return "working data set to htmlForTable";
     }
 
+
+
+    protected function classesToAddToCell($cellData){
+        $classList = array();
+        if( is_numeric($cellData) ){
+            $positiveOrNegative = $this->addClassPositiveOrNegative($cellData);
+            if($positiveOrNegative != false){$classList[] = $positiveOrNegative;}
+        }
+        return $classList;
+    }
+    protected function addClassPositiveOrNegative($cellData){
+        // $number = substr($cellHtml, 4, -4);
+        if($cellData > 0){ return "positive";}
+        if($cellData == 0){ return "zeroSum";}
+        if($cellData < 0){ return "negative";}
+        
+    }
+
     protected function generateSummaryRows(){
         $summaryRows = [];
-        echo '<br />FINAL SUMMARIES : <br />';
-        var_dump($this->requestedSummaries);
+        // echo '<br />FINAL SUMMARIES : <br />';
+        // var_dump($this->requestedSummaries);
         for($i=0; $i < count($this->requestedSummaries); $i++){
             $requestedOperation = $this->requestedSummaries[$i]["requestedOperation"];
             $currentSummaryTotal = $this->requestedSummaries[$i]["runningTotalSum"];
+            $currentSummaryEntryTotal = $this->requestedSummaries[$i]["runningEntriesTotal"];
+            $resultValueOfOperation;
+            switch($requestedOperation){
+                case "Average":
+                    $resultValueOfOperation = $currentSummaryTotal / $currentSummaryEntryTotal;
+                    break;
+                case "Total":
+                    $resultValueOfOperation = $currentSummaryTotal;
+                    break;
+            }
             if(array_key_exists( $requestedOperation, $summaryRows) == false){
-                echo "<br />making summary row for " . $requestedOperation;
+                // echo "<br />making summary row for " . $requestedOperation;
                 $summaryRows[$requestedOperation] = array();
                 // fill array with empty values
                 $numberOfColumns = $this->getNumberOfColumns();
@@ -76,31 +107,29 @@ class TableMaker{
                     $summaryRows[$requestedOperation][$x]='-';
                 }
             }
-            echo "<br />existing summary row for " . $requestedOperation;
+            // echo "<br />existing summary row for " . $requestedOperation;
             // Insert value into column index
             $iOfOperationColumn = $this->requestedSummaries[$i]["columnIndex"];
-            $summaryRows[$requestedOperation][$iOfOperationColumn] = $currentSummaryTotal;
-            // $this->requestedSummaries[$i]
-
+            $summaryRows[$requestedOperation][$iOfOperationColumn] = $resultValueOfOperation;
         }
-        echo '<br />FINAL SUMMARY ROWS FIXED: <br />';
-        var_dump($summaryRows);
+        // echo '<br />FINAL SUMMARY ROWS FIXED: <br />';
+        // var_dump($summaryRows);
         return $summaryRows;
     }
 
     protected function generateSummariesHtml($summaryRows){
-        $summariesHtmlBlock='';
+        $summariesHtmlBlock='<tbody>';
         foreach (array_keys($summaryRows) as $arrayKey) {
-            echo $arrayKey;
-            $rowHtml = '<tr>';
+            // $rowHtml = '<tr>';
+            $rowHtml = '<tr class="summariesRow">';
             for($i=0; $i < count($summaryRows[$arrayKey]); $i++){
                 $rowHtml .= $this->generateCellHtml($summaryRows[$arrayKey][$i], 'td');
             }
             $rowHtml .= $this->generateCellHtml( $arrayKey, 'th');
             $rowHtml .= '</tr>';
-            // Should have a summary row with a TH cell at the end of each row
             $summariesHtmlBlock .= $rowHtml;
         }
+        $summariesHtmlBlock .= '</tbody>';
         return $summariesHtmlBlock;
 
     }
@@ -151,7 +180,12 @@ class TableMaker{
         return $rowHtml;
     }
     protected function generateCellHtml($cellData, $cellElemement = 'td'){
-        $cellHtml = '<' . $cellElemement . '>' . $cellData . '</' . $cellElemement . '>';
+        $classList = $this->classesToAddToCell($cellData);
+        $classesAsString = '';
+        foreach($classList as $class){
+            $classesAsString .= $class . ' ';
+        }
+        $cellHtml = '<' . $cellElemement . ' class="' . $classesAsString . '">' . $cellData . '</' . $cellElemement . '>';
         return $cellHtml;
     }
 
@@ -255,7 +289,7 @@ class TableMaker{
             return $columnLabelString;
         } else{ return $label; }
     }
-    static function addToRowTotalProfit( $workingRow, $iOfBuyPrice, $iOfSellPrice, $iOfQuantitySold){
+    static function addToRowTotalProfit( $workingRow, $iOfBuyPrice, $iOfSellPrice, $iOfQuantitySold, $conversionRate=1){
         $rowWithNewColumn = $workingRow;
         // echo '<br />addToRowProfitMargin :<br />';
         // print_r($workingRow);
@@ -266,23 +300,7 @@ class TableMaker{
         // echo '<br />';
         // print_r($iOfQuantitySold);
         // echo '<br />';
-        $rowWithNewColumn[] = ($workingRow[$iOfSellPrice] - $workingRow[$iOfBuyPrice]) * $workingRow[$iOfQuantitySold];
-        return $rowWithNewColumn;
-    }
-    static function addToRowTotalProfitConverted( $workingRow, $iOfBuyPrice, $iOfSellPrice, $iOfQuantitySold, $conversionRate){
-        $rowWithNewColumn = $workingRow;
-        // echo '<br />addToRowProfitMarginConverted :<br />';
-        // print_r($workingRow);
-        // echo '<br />';
-        // print_r($iOfBuyPrice);
-        // echo '<br />';
-        // print_r($iOfSellPrice);
-        // echo '<br />';
-        // print_r($iOfQuantitySold);
-        // echo '<br />';
-        // var_dump($conversionRate);
-        // echo '<br />';
-        $rowWithNewColumn[] = (($workingRow[$iOfSellPrice] - $workingRow[$iOfBuyPrice]) * $workingRow[$iOfQuantitySold]) * $conversionRate ;
+        $rowWithNewColumn[] = (($workingRow[$iOfSellPrice] - $workingRow[$iOfBuyPrice]) * $workingRow[$iOfQuantitySold]) * $conversionRate;
         return $rowWithNewColumn;
     }
     static function addToRowProfitMargin( $workingRow, $iOfBuyPrice, $iOfSellPrice){
