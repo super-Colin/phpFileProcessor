@@ -44,13 +44,64 @@ class TableMaker{
             $htmlForTable .= $this->generateTableHeadHtml( $headerRow);
         }
         if($this->columnFuncs == false){$this->setColumnFuncs($columnFuncsToUse);}
+
         // TABLE ROWS
         $this->setRequestedSummaries($summaryFuncsToUse);
         $this->setRequestedSummariesColumnIndexes();
-        $htmlForTable .= $this->generateTableBodyHtml($this->workingData) . '</table>';
-        $this->getFinalSummariesRow();
+        $htmlForTable .= $this->generateTableBodyHtml($this->workingData);
+
+        //SUMMARIES BLOCK
+        $summaryRows = $this->generateSummaryRows();
+        $summariesHtml = $this->generateSummariesHtml($summaryRows);
+
+        $htmlForTable .= $summariesHtml;
+        $htmlForTable .= '</table>';
         $this->workingData = $htmlForTable;
         return "working data set to htmlForTable";
+    }
+
+    protected function generateSummaryRows(){
+        // $this->
+        $summaryRows = [];
+        echo '<br />FINAL SUMMARIES : <br />';
+        var_dump($this->requestedSummaries);
+        for($i=0; $i < count($this->requestedSummaries); $i++){
+            $requestedOperation = $this->requestedSummaries[$i]["requestedOperation"];
+            if(array_key_exists( $requestedOperation, $summaryRows) ){
+                echo "<br />existing summary row for " . $requestedOperation;
+                
+            }else{
+                echo "<br />making summary row for " . $requestedOperation;
+                $summaryRows[$requestedOperation] = array();
+                // fill array with empty values
+                $numberOfColumns = $this->getNumberOfColumns();
+                for($x=0; $x < $numberOfColumns; $x++){
+                    $summaryRows[$requestedOperation][$x]='-';
+                }
+            }
+
+
+        }
+        echo '<br />FINAL SUMMARY ROWS FIXED: <br />';
+        var_dump($summaryRows);
+        return $summaryRows;
+    }
+
+    protected function generateSummariesHtml($summaryRows){
+        $summariesHtmlBlock='';
+        foreach (array_keys($summaryRows) as $arrayKey) {
+            echo $arrayKey;
+            $rowHtml = '<tr>';
+            for($i=0; $i < count($summaryRows[$arrayKey]); $i++){
+                $rowHtml .= $this->generateCellHtml($summaryRows[$arrayKey][$i], 'td');
+            }
+            $rowHtml .= $this->generateCellHtml( $arrayKey, 'th');
+            $rowHtml .= '</tr>';
+            // Should have a summary row with a TH cell at the end of each row
+            $summariesHtmlBlock .= $rowHtml;
+        }
+        return $summariesHtmlBlock;
+
     }
 
     protected function generateTableHeadHtml($headerRow){
@@ -81,15 +132,14 @@ class TableMaker{
                     }
                 }
             }
-            $htmlForTableBody .= $this->generateRowHtml($this->workingData[$i]) . "</tbody>";
+            $htmlForTableBody .= $this->generateRowHtml($this->workingData[$i]);
         }
+        $htmlForTableBody .= "</tbody>";
         return $htmlForTableBody;
     }
 
-
     protected function generateRowHtml($rowData, $cellElemement = 'td'){
         $rowHtml = '<tr>';
-        // RUN requestedSummaries FUNCTION HERE?
         if($this->requestedSummaries != false){
             $this->proccessRequestedSummariesForRow($rowData);
         }
@@ -103,7 +153,6 @@ class TableMaker{
         $cellHtml = '<' . $cellElemement . '>' . $cellData . '</' . $cellElemement . '>';
         return $cellHtml;
     }
-
 
     // --- calculate and add columns to row ---
     protected function setColumnFuncs($columnFuncsToUse){
@@ -186,12 +235,16 @@ class TableMaker{
             // echo '<br /><br />';
         }
     }
-    protected function getFinalSummariesRow(){
-        // $this->
-        $emptyRow = [];
-        echo '<br />FINAL SUMMARIES ROW : <br />';
-        var_dump($this->requestedSummaries);
+
+
+    // protected function generateSummaryRows(){
+    // }
+
+
+    protected function getNumberOfColumns(){
+        return count($this->headers);
     }
+
     static function headerLabelStringToIndex( $headerRow, $columnLabelString){
         // echo '<br />labelStringToIndex :<br />';
         // print_r($headerRow);
