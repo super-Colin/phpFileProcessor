@@ -1,6 +1,7 @@
 <?php
     include 'includes/fileHandler.inc.php';
     include 'includes/tableMaker.inc.php';
+    include 'includes/currencyConverter.inc.php';
 ?>
 
 <!DOCTYPE html>
@@ -17,15 +18,51 @@
     <h1>Create a Table</h1>
 
     <!-- <form action="makeTable.php" method="post" enctype="multipart/form-data"> -->
-    <form action="" method="post" enctype="multipart/form-data">
-        CSV To Make Table From:<br /><input type="file" name="filename" accept=".csv">
-        <br /><br />
-        <input type="submit" value="Upload CSV File" name="submit">
+    <form action="" method="post" enctype="multipart/form-data" style="display:flex; flex-wrap:wrap;">
+
+        <div>
+            <h3>CSV To Make Table From:</h3>
+            <input type="file" name="filename" accept=".csv">
+        </div>
+
+<!-- <script>
+    function displayCommonFunctionOptions(e)=>{
+        e.parentElement.querySelector('.commonFunctionDetails').classList.toggle('hidden');
+    }
+</script>
+        <div>
+            <h3>Common Functions:</h3>
+            <div>
+                <input type="checkbox" name="totalProfit" onClick="displayCommonFunctionOptions">
+                <label for="totalProfit">Total Profit</label>
+                <div class="commonFunctionDetails hidden">
+                    <p>Deets</p>
+                </div>
+            </div>
+            
+        </div> -->
+
+        <div style="width:100%">
+            <br /><br />
+            Submit:
+            <input type="submit" value="Upload CSV File" name="submit">
+        </div>
+
+
     </form>
 
 
 <?php
 if (isset($_POST['submit'])){
+
+
+
+// $currencyConverter = new CurrencyConverter(); 
+// // $result = $currencyConverter->convert($currency_from = "USD", $currency_to = "CAD", $currency_input = 1);
+// $result = $currencyConverter->convert("JPY", "INR", 1);
+// echo $result;
+
+
 
 $fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filename']['type']);
 
@@ -35,14 +72,12 @@ if( $explodeCsvStatus  != false){
 
 
     $tableStatus = $tableMaker->generateTableHtml( true, array(
-        // array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[1, 2]),
-
         array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>["Cost", "Price"], "functionArgsAreLabels"=>true),
-
-
-        // array("headerLabel"=>"Total Profit", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[1, 2,3], "functionArgsAreLabels"=>false),
-        array("headerLabel"=>"Total Profit", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true)
-    ));
+        array("headerLabel"=>"Total Profit USD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true),
+        array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfitConverted", "functionArgs"=>["Cost", "Price", "Qty", 1.25], "functionArgsAreLabels"=>true)
+    ),
+        array(["Cost", "average"], ["Price", "average"], ["Total Profit USD", "totalSum"])
+);
 
 
     if( $tableStatus  != false){
@@ -105,6 +140,9 @@ echo "-->";
     </script> -->
 
     <style>
+        .hidden{
+            display:none;
+        }
         thead{
             background-color:#eee;
         }
