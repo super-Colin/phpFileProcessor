@@ -149,7 +149,7 @@ echo "-->";
             background-color:#eee;
         }
         td, th{
-            padding: 0.3rem;
+            padding: 0.3rem 0.5rem;
         }
         th{
             background-color:#e3e3e3;
