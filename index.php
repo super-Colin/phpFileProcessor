@@ -3,10 +3,8 @@
     include 'includes/tableMaker.inc.php';
     include 'includes/currencyConverter.inc.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,18 +12,26 @@
     <title>PHP File Processor</title>
 </head>
 
-
 <?php 
+// Set values to back to what they were if was previously set
 if ( isset($_POST['submit']) == false ){
-        $ourBuyPriceLabel = "Cost";
+    $ourBuyPriceLabel = "Cost";
+    $ourSellPriceLabel = "Price";
+    $ourQtySoldLabel = "Qty";
+    $columnToAddLabel = "Profit Margin USD";
+    $columnToAddFunction = "columnToAddFunction";
+    // $columnToAddLabel2 = "These will need to be generated with JS";
+    // $columnToAddFunction2 = "These will need to be generated with JS";
 }else{
-    echo "buy price label was NOT empty";
     $ourBuyPriceLabel = clean_input($_POST['ourBuyPriceLabel']);
+    $ourSellPriceLabel = clean_input($_POST['ourSellPriceLabel']);
+    $ourQtySoldLabel = clean_input($_POST['ourQtySoldLabel']);
+    $columnToAddLabel = clean_input($_POST['columnToAddLabel']);
+    $columnToAddFunction = clean_input($_POST['columnToAddFunction']);
+    // if (isset($columnToAddLabel2)) $columnToAddLabel2= clean_input($_POST['columnToAddLabel2'];
+    // if (isset($columnToAddFunction2)) $columnToAddFunction2= clean_input($_POST['columnToAddFunction2'];
 }
 
-
-if( empty($ourSellPriceLabel) ){$ourSellPriceLabel = "Price";}
-if( empty($ourQtySoldLabel) ){$ourQtySoldLabel = "Qty";}
 
 
 function clean_input($data) {
@@ -47,9 +53,36 @@ function clean_input($data) {
             <input type="file" name="filename" accept=".csv" required>
         </div>
 
-        <div class="referenceColumnLabelFormBlock" id="ourBuyPrice">
-            Our Buy Price Column Label:
-            <input type="text" name="ourBuyPriceLabel" value="<?php echo $ourBuyPriceLabel;?>" required>
+        <div>
+            <h2>Columns needed for functions:</h2>
+
+            <div class="referenceColumnLabelFormBlock" id="ourBuyPrice">
+                <label for="ourBuyPriceLabel">Our Buy Price Column Label:</label>
+                <input type="text" name="ourBuyPriceLabel" value="<?php echo $ourBuyPriceLabel;?>" required>
+            </div>
+            <div class="referenceColumnLabelFormBlock" id="ourSellPrice">
+                <label for="ourSellPriceLabel">Our Sell Price Column Label:</label>
+                <input type="text" name="ourSellPriceLabel" value="<?php echo $ourSellPriceLabel;?>" required>
+            </div>
+            <div class="referenceColumnLabelFormBlock" id="ourQtySold">
+                <label for="ourQtySoldLabel">Our Quantity Sold Column Label:</label>
+                <input type="text" name="ourQtySoldLabel" value="<?php echo $ourQtySoldLabel;?>" required>
+            </div>
+        </div>
+
+        <div>
+            <h2>Add Columns:</h2>
+            
+            <div class="desiredFunctionFormBlock" id="1">
+                <label for="columnToAddLabel">Column To Add Label:</label>
+                <input type="text" name="columnToAddLabel" value="<?php echo $columnToAddLabel;?>">
+                <label for="columnToAddFunction">Column To Add Function:</label>
+                <select name="columnToAddFunction">
+                    <option value="addToRowProfitMargin" <?php if($columnToAddFunction =="addToRowProfitMargin"){echo 'selected="selected"';}?>>Profit Margin</option>
+                    <option value="addToRowTotalProfit" <?php if($columnToAddFunction =="addToRowTotalProfit"){echo 'selected="selected"';}?>>Total Profit</option>
+                </select>
+
+            </div>
         </div>
 
 
@@ -58,7 +91,6 @@ function clean_input($data) {
             Submit:
             <input type="submit" value="Upload CSV File" name="submit">
         </div>
-
 
     </form>
 
@@ -77,25 +109,18 @@ function clean_input($data) {
 
 if (isset($_POST['submit'])){
 
-// $currencyConverter = new CurrencyConverter();
-// $rate = $currencyConverter->getConverstionRate("USD", "CAD");
-// $rate = CurrencyConverter::getConverstionRate("USD", "CAD");
-// echo "RATE IS SET AT : $rate";
-// var_dump($rate);
-
-
 $fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filename']['type']);
-
 $explodeCsvStatus = $fileHandler->explodeCsv();
 if( $explodeCsvStatus  != false){
     $tableMaker = new TableMaker($fileHandler->getData());
 
     $tableStatus = $tableMaker->generateTableHtml( true, array(
         // Columns we want to add on processing
-        array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>["Cost", "Price"], "functionArgsAreLabels"=>true),
-        array("headerLabel"=>"Total Profit USD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true),
-        array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ "Cost", "Price", "Qty", CurrencyConverter::getConverstionRate("USD", "CAD") ], "functionArgsAreLabels"=>true),
-        array("headerLabel"=>"Total Profit EUR", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ "Cost", "Price", "Qty", CurrencyConverter::getConverstionRate("USD", "EUR") ], "functionArgsAreLabels"=>true)
+        array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>[$ourBuyPriceLabel, $ourSellPriceLabel], "functionArgsAreLabels"=>true),
+        array("headerLabel"=>"Total Profit USD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[$ourBuyPriceLabel, $ourSellPriceLabel, $ourQtySoldLabel], "functionArgsAreLabels"=>true),
+        array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ $ourBuyPriceLabel, $ourSellPriceLabel, $ourQtySoldLabel, CurrencyConverter::getConverstionRate("USD", "CAD") ], "functionArgsAreLabels"=>true),
+        array("headerLabel"=>"Total Profit EUR", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ $ourBuyPriceLabel, $ourSellPriceLabel, $ourQtySoldLabel, CurrencyConverter::getConverstionRate("USD", "EUR") ], "functionArgsAreLabels"=>true),
+        array("headerLabel"=>$columnToAddLabel, "functionName"=>$columnToAddFunction, "functionArgs"=>[ $ourBuyPriceLabel, $ourSellPriceLabel, $ourQtySoldLabel ], "functionArgsAreLabels"=>true),
 
         // Our getConverstionRate method is very inefficient since it makes a new request for each
         // ...and parsing the entire page every time :/
@@ -202,6 +227,9 @@ else{echo "<h2>Something went wrong:<br />" . $fileHandler->getData() . "<br /><
         }
         .negative{
             background-color: #c88;
+        }
+        .zeroSum{
+            background-color: #cc8;
         }
     </style>
 </body>
