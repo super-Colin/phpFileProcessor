@@ -252,6 +252,9 @@ class TableMaker{
         // echo '<br />Set Requested Summaries:<br />';
         // var_dump($requestedSummaries);
         for($i=0; $i < count($requestedSummaries); $i++){
+            if(empty($requestedSummaries[$i])){
+                continue;
+            }
             // echo '<br />SetRequestedSummaries KEY:<br />';
             // var_dump( $requestedSummaries[$i] );
             $formattedSummaries[] = [

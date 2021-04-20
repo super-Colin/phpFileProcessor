@@ -22,6 +22,8 @@ if ( isset($_POST['submit']) == false ){
     $columnToAddFunction = "columnToAddFunction";
     // $columnToAddLabel2 = "These will need to be generated with JS";
     // $columnToAddFunction2 = "These will need to be generated with JS";
+    $columnToAddSummaryAverageChecked = false;
+    $columnToAddSummaryTotalChecked = false;
 }else{
     $ourBuyPriceLabel = clean_input($_POST['ourBuyPriceLabel']);
     $ourSellPriceLabel = clean_input($_POST['ourSellPriceLabel']);
@@ -30,6 +32,17 @@ if ( isset($_POST['submit']) == false ){
     $columnToAddFunction = clean_input($_POST['columnToAddFunction']);
     // if (isset($columnToAddLabel2)) $columnToAddLabel2= clean_input($_POST['columnToAddLabel2'];
     // if (isset($columnToAddFunction2)) $columnToAddFunction2= clean_input($_POST['columnToAddFunction2'];
+    $columnToAddSummaryAverageChecked = false;
+    $columnToAddSummaryTotalChecked = false;
+    if(isset($_POST['columnToAddSummaryAverage'])){
+        $columnToAddSummaryAverageChecked = $_POST['columnToAddSummaryAverage'];
+    }
+    if(isset($_POST['columnToAddSummaryTotal'])){
+    $columnToAddSummaryTotalChecked = $_POST['columnToAddSummaryTotal'];
+    }
+
+    // echo "column add Total summary is: $columnToAddSummaryTotalChecked, average is: $columnToAddSummaryAverageChecked";
+
 }
 
 
@@ -76,11 +89,20 @@ function clean_input($data) {
             <div class="desiredFunctionFormBlock" id="1">
                 <label for="columnToAddLabel">Column To Add Label:</label>
                 <input type="text" name="columnToAddLabel" value="<?php echo $columnToAddLabel;?>">
+                <br />
                 <label for="columnToAddFunction">Column To Add Function:</label>
                 <select name="columnToAddFunction">
                     <option value="addToRowProfitMargin" <?php if($columnToAddFunction =="addToRowProfitMargin"){echo 'selected="selected"';}?>>Profit Margin</option>
                     <option value="addToRowTotalProfit" <?php if($columnToAddFunction =="addToRowTotalProfit"){echo 'selected="selected"';}?>>Total Profit</option>
                 </select>
+                <br />
+                <label for="columnToAddSummaryTotal">Summary of Total</label>
+                <!-- <input type="checkbox" name="columnToAddSummaryTotal" value="<?php //echo $columnToAddSummaryTotalChecked;?>"> -->
+                <input type="checkbox" name="columnToAddSummaryTotal" value="Total" <?php if($columnToAddSummaryTotalChecked) echo "checked";?> >
+                <br />
+                <label for="columnToAddSummaryAverage">Summary of Average</label>
+                <input type="checkbox" name="columnToAddSummaryAverage" value="Average"  <?php if($columnToAddSummaryAverageChecked) echo "checked";?> >
+                <br />
 
             </div>
         </div>
@@ -136,7 +158,12 @@ if( $explodeCsvStatus  != false){
         ["Total Profit CAD", "Total"],
         ["Total Profit EUR", "Average"],
         ["Total Profit EUR", "Total"],
-        ["Qty", "Total"]
+        ["Qty", "Total"],
+        $columnToAddSummaryAverageChecked ? [ $columnToAddLabel, "Average"] : [],
+        $columnToAddSummaryTotalChecked ? [ $columnToAddLabel, "Total"] : [],
+        // (if($columnToAddSummaryTotalChecked){
+        //     []
+        // })
     )
 );
 
