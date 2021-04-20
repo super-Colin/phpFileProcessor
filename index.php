@@ -14,6 +14,29 @@
     <title>PHP File Processor</title>
 </head>
 
+
+<?php 
+if ( isset($_POST['submit']) == false ){
+        $ourBuyPriceLabel = "Cost";
+}else{
+    echo "buy price label was NOT empty";
+    $ourBuyPriceLabel = clean_input($_POST['ourBuyPriceLabel']);
+}
+
+
+if( empty($ourSellPriceLabel) ){$ourSellPriceLabel = "Price";}
+if( empty($ourQtySoldLabel) ){$ourQtySoldLabel = "Qty";}
+
+
+function clean_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
+?>
+
+
 <body>
     <h1>Create a Table</h1>
 
@@ -22,6 +45,11 @@
         <div>
             <h3>CSV To Make Table From:</h3>
             <input type="file" name="filename" accept=".csv" required>
+        </div>
+
+        <div class="referenceColumnLabelFormBlock" id="ourBuyPrice">
+            Our Buy Price Column Label:
+            <input type="text" name="ourBuyPriceLabel" value="<?php echo $ourBuyPriceLabel;?>" required>
         </div>
 
 

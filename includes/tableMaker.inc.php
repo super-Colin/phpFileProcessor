@@ -349,6 +349,7 @@ class TableMaker{
         return $int;
     }
     static function isCurrency($string){
+        // Not looking for many currencies at the moment
         $currencySymbols = ["$", "¥", "€"];
         if(filter_var($string, FILTER_SANITIZE_NUMBER_INT) === false){echo "IS NOT CURRENCY <br />";return false;}
         for($i=0;$i < count($currencySymbols); $i++){
