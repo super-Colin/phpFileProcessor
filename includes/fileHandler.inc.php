@@ -36,7 +36,7 @@ class FileHandler{
             }
             $explodedCsv[] = $rowValues;
             $rowNumber++;
-            if($rowNumber > 1000){$this->workingData = 'rowNumber failsafe triggered';return false;}
+            if($rowNumber > 5000){$this->workingData = "rowNumber failsafe of :$rowNumber triggered";return false;}
         }
         $this->workingData = array();
         $this->workingData = $explodedCsv;

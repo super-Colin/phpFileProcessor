@@ -17,7 +17,6 @@
 <body>
     <h1>Create a Table</h1>
 
-    <!-- <form action="makeTable.php" method="post" enctype="multipart/form-data"> -->
     <form action="" method="post" enctype="multipart/form-data" style="display:flex; flex-wrap:wrap;">
 
         <div>
@@ -25,22 +24,6 @@
             <input type="file" name="filename" accept=".csv" required>
         </div>
 
-<!-- <script>
-    function displayCommonFunctionOptions(e)=>{
-        e.parentElement.querySelector('.commonFunctionDetails').classList.toggle('hidden');
-    }
-</script>
-        <div>
-            <h3>Common Functions:</h3>
-            <div>
-                <input type="checkbox" name="totalProfit" onClick="displayCommonFunctionOptions">
-                <label for="totalProfit">Total Profit</label>
-                <div class="commonFunctionDetails hidden">
-                    <p>Deets</p>
-                </div>
-            </div>
-            
-        </div> -->
 
         <div style="width:100%">
             <br /><br />
@@ -53,14 +36,17 @@
 
 
 
-
-
-
-
-
-
-
 <?php
+
+// FORM for more DYNAMICISM!
+// Should make sure string to label index isn't sensitive to capital letters
+
+// add css child selectors for relevent column index
+
+// Highest / Lowest value summary options??
+// Mark cells over a given value??
+
+
 if (isset($_POST['submit'])){
 
 // $currencyConverter = new CurrencyConverter();
@@ -82,6 +68,10 @@ if( $explodeCsvStatus  != false){
         array("headerLabel"=>"Total Profit USD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true),
         array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ "Cost", "Price", "Qty", CurrencyConverter::getConverstionRate("USD", "CAD") ], "functionArgsAreLabels"=>true),
         array("headerLabel"=>"Total Profit EUR", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ "Cost", "Price", "Qty", CurrencyConverter::getConverstionRate("USD", "EUR") ], "functionArgsAreLabels"=>true)
+
+        // Our getConverstionRate method is very inefficient since it makes a new request for each
+        // ...and parsing the entire page every time :/
+
     ),
     // Summaries to keep track of and output
     array(
@@ -89,6 +79,10 @@ if( $explodeCsvStatus  != false){
         ["Price", "Average"],
         ["Total Profit USD", "Average"],
         ["Total Profit USD", "Total"],
+        ["Total Profit CAD", "Average"],
+        ["Total Profit CAD", "Total"],
+        ["Total Profit EUR", "Average"],
+        ["Total Profit EUR", "Total"],
         ["Qty", "Total"]
     )
 );

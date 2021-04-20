@@ -1,12 +1,5 @@
 <?php
 
-// need to get currency converter working
-
-// add css child selectors for relevent column index
-
-// Highest / Lowest value summary options??
-// Mark cells over a given value??
-
 class TableMaker{
     private $inputData;
     private $workingData;
