@@ -2,13 +2,8 @@
 
 // need to get currency converter working
 
-// Need to be able to parse out currency symbols in input
-// ^^^^^^^^^^ - $ - ^^^^^^^^^^^
-// Add back currency symbols - $ -
+// add css child selectors for relevent column index
 
-// add positive / negative styling classes with css child selectors for column index relevance
-
-// Need to round averages summaries to 2 decimal points
 // Highest / Lowest value summary options??
 // Mark cells over a given value??
 
@@ -67,14 +62,16 @@ class TableMaker{
         $classList = array();
         if( is_numeric($cellData) ){
             $positiveOrNegative = $this->addClassPositiveOrNegative($cellData);
-            if($positiveOrNegative != false){$classList[] = $positiveOrNegative;}
+            if($positiveOrNegative !== false){$classList[] = $positiveOrNegative;}
         }
         return $classList;
     }
     protected function addClassPositiveOrNegative($cellData){
-        if($cellData > 0){ return "positive";}
-        if($cellData == 0){ return "zeroSum";}
-        if($cellData < 0){ return "negative";}
+        $num = self::getIntFromString($cellData);
+        if($num > 0){ return "positive";}
+        if($num == 0){ return "zeroSum";}
+        if($num < 0){ return "negative";}
+        return "other";
     }
 
     protected function generateTableHeadHtml($headerRow){
@@ -195,9 +192,6 @@ class TableMaker{
                 // $cleanedData = number_format(self::stripCurrencySymbol($cellData, $currencyUsedIndex),2,".", ",");
                 $cleanedData = self::getIntFromString($cellData);
             }else{$cleanedData = $cellData;}
-            if( gettype($cleanedData) =="double"){
-                $cleanedData = number_format($cleanedData,2,".", ",");
-            }
         }else{
             // echo "celldata is NOT numeric: $cellData<br />";
             $cleanedData = $cellData;
@@ -205,6 +199,9 @@ class TableMaker{
         // echo "<br />cleaned data is: $cleanedData <br />";
 
         $classList = $this->classesToAddToCell($cleanedData);
+        if( gettype($cleanedData) =="double"){
+            $cleanedData = number_format($cleanedData,2,".", ",");
+        }
         if($currencyUsedIndex !== false){
             $formattedForHtmlData = substr( $cellData, $currencyUsedIndex, 1) . $cleanedData;
         }else{
@@ -308,11 +305,6 @@ class TableMaker{
         }
     }
 
-
-
-
-
-
     static function headerLabelStringToIndex( $headerRow, $columnLabelString){
         // echo '<br />labelStringToIndex :<br />';
         // print_r($headerRow);
@@ -354,6 +346,7 @@ class TableMaker{
         $rowWithNewColumn[] = self::getIntFromString($workingRow[$iOfSellPrice]) - self::getIntFromString($workingRow[$iOfBuyPrice]);
         return $rowWithNewColumn;
     }
+    // Not very robust honestly... 
     static function getIntFromString($string){
         $currencyUsedIndex = self::isCurrency( $string );
         if($currencyUsedIndex !== false){

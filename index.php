@@ -52,15 +52,22 @@
     </form>
 
 
+
+
+
+
+
+
+
+
 <?php
 if (isset($_POST['submit'])){
 
-
-// $currencyConverter = new CurrencyConverter(); 
-// // $result = $currencyConverter->convert($currency_from = "USD", $currency_to = "CAD", $currency_input = 1);
-// $result = $currencyConverter->convert("JPY", "INR", 1);
-// echo $result;
-
+// $currencyConverter = new CurrencyConverter();
+// $rate = $currencyConverter->getConverstionRate("USD", "CAD");
+// $rate = CurrencyConverter::getConverstionRate("USD", "CAD");
+// echo "RATE IS SET AT : $rate";
+// var_dump($rate);
 
 
 $fileHandler = new FileHandler($_FILES['filename']['tmp_name'], $_FILES['filename']['type']);
@@ -73,12 +80,14 @@ if( $explodeCsvStatus  != false){
         // Columns we want to add on processing
         array("headerLabel"=>"Profit Margin", "functionName"=>"addToRowProfitMargin", "functionArgs"=>["Cost", "Price"], "functionArgsAreLabels"=>true),
         array("headerLabel"=>"Total Profit USD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty"], "functionArgsAreLabels"=>true),
-        array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>["Cost", "Price", "Qty", 1.25], "functionArgsAreLabels"=>true)
+        array("headerLabel"=>"Total Profit CAD", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ "Cost", "Price", "Qty", CurrencyConverter::getConverstionRate("USD", "CAD") ], "functionArgsAreLabels"=>true),
+        array("headerLabel"=>"Total Profit EUR", "functionName"=>"addToRowTotalProfit", "functionArgs"=>[ "Cost", "Price", "Qty", CurrencyConverter::getConverstionRate("USD", "EUR") ], "functionArgsAreLabels"=>true)
     ),
     // Summaries to keep track of and output
     array(
         ["Cost", "Average"],
         ["Price", "Average"],
+        ["Total Profit USD", "Average"],
         ["Total Profit USD", "Total"],
         ["Qty", "Total"]
     )
@@ -98,32 +107,20 @@ else{echo "<h2>Something went wrong:<br />" . $fileHandler->getData() . "<br /><
 
 
 
-// echo "<br /> <br />";
-// $echoData = $fileHandler->getData();
-// echo "data is: <br />";var_dump($echoData);
 
-echo "<!--";
-?><br />_DATA:<br /><?php
-//     var_dump($fileHandler->getData());
-// ?><br />_POST:<br /><?php
-//     var_dump($_POST);
-// ?><br />_FILES:<br /><?php
-//     var_dump($_FILES);
-// echo "<!--";
-?><br /><br /><?php
-    // $handle = fopen($_FILES['filename']['tmp_name'], "r");
-    // $headers = fgetcsv($handle, 1000, ",");
-    // $data = fgetcsv($handle, 1000, ",");
-    // ?><br />Handle:<br /><?php
-    // var_dump($handle);
-    // ?><br /><br />Headers:<br /><?php
-    // var_dump($headers);
-    // ?><br /><br />Data:<br /><?php
-    // var_dump($data);
-    // ?><br /><br /><?php
-    // fclose($handle);
-echo "-->";  
-}
+
+
+} //if _POST
+
+
+// echo '<br />------------<br />';
+    // https://www.google.com/finance/quote/USD-CAD
+
+
+
+
+
+
 ?>
 
     <!-- <script>
@@ -159,6 +156,9 @@ echo "-->";
         }
         td{
             background-color:#c3c3c3;
+        }
+        .other{
+            background-color:orange;
         }
         .hidden{
             display:none;
